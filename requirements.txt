@@ -1,0 +1,14 @@
+# ML
+torch
+torchvision
+
+# Quantum Computing
+merlinquantum
+
+# Data & Logging
+pandas
+numpy
+tensorboard
+
+# Visualization & Analytics
+matplotlib
