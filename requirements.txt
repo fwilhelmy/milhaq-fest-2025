@@ -1,14 +1,13 @@
-# ML
+# Machine Learning
 torch
 torchvision
+scikit-learn
 
 # Quantum Computing
 merlinquantum
 
-# Data & Logging
+# Data & Analytics
 pandas
 numpy
-tensorboard
-
-# Visualization & Analytics
 matplotlib
+tensorboard
