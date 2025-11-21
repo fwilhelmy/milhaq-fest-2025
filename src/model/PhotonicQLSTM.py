@@ -38,7 +38,7 @@ def universal_interferometer(m: int, tag: str) -> pcvl.GenericInterferometer:
         // pcvl.PS(pcvl.P(f"theta_{tag}_in_{idx}"))
         // pcvl.BS()
         // pcvl.PS(pcvl.P(f"theta_{tag}_out_{idx}")),
-        shape=pcvl.InterferometerShape.RECTANGLE,
+        shape=pcvl.InterferometerShape.TRIANGLE,
     )
 
 

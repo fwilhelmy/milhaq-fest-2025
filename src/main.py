@@ -9,7 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from data import SwaptionDataset, load_data, prepare_data, split_data
-from model import LSTM #, QLSTM
+from model import LSTM
+from model import GateQLSTM, PhotonicQLSTM
 
 
 def create_dataloaders(
@@ -53,11 +54,17 @@ def run_training(args):
         batch_size=args.batch_size,
     )
 
-    model = LSTM(
+    # model = LSTM(
+    #     input_size=feature_count,
+    #     hidden_size=args.hidden_size,
+    #     num_layers=args.num_layers,
+    #     dropout=args.dropout,
+    #     lr=args.lr,
+    # )
+
+    model = PhotonicQLSTM(
         input_size=feature_count,
         hidden_size=args.hidden_size,
-        num_layers=args.num_layers,
-        dropout=args.dropout,
         lr=args.lr,
     )
 
@@ -80,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--sequence-length", type=int, default=10, help="Sequence length for the LSTM input")
     parser.add_argument("--forecast-horizon", type=int, default=1, help="Days ahead to predict")
     parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
-    parser.add_argument("--hidden-size", type=int, default=128, help="Hidden size of the LSTM")
+    parser.add_argument("--hidden-size", type=int, default=16, help="Hidden size of the LSTM")
     parser.add_argument("--num-layers", type=int, default=2, help="Number of LSTM layers")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout between LSTM layers")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")

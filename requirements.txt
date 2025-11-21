@@ -6,6 +6,7 @@ pytorch-lightning
 
 # Quantum Computing
 merlinquantum
+pennylane
 
 # Data & Analytics
 pandas
