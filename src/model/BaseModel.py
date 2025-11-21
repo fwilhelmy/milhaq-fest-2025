@@ -25,8 +25,9 @@ class BaseModel(pl.LightningModule):
         loss = self.criterion(preds, y)
         mae = F.l1_loss(preds, y)
 
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
-        self.log(f"{stage}_mae", mae, prog_bar=(stage == "val"), on_epoch=True, on_step=False)
+        if stage != "test":
+            self.log(f"loss/{stage}", loss, prog_bar=True, on_epoch=True, on_step=False)
+            self.log(f"mae/{stage}", mae, prog_bar=(stage == "val"), on_epoch=True, on_step=False)
         return loss
 
     def training_step(self, batch, batch_idx):
