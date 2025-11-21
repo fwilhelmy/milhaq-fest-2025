@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from data import prepare_data
-from model import prepare_quantum_model
+from models.model import prepare_quantum_model
 
 
 def run_experiment(layer: torch.nn.Module, epochs: int = 80, lr: float = 5e-2):
@@ -24,6 +24,6 @@ def run_experiment(layer: torch.nn.Module, epochs: int = 80, lr: float = 5e-2):
     return train_acc, test_acc
 
 if __name__ == "__main__":
-    model = prepare_quantum_model()
+    model = torch.nn.LSTM(input_size=3, hidden_size=5, num_layers=2, batch_first=True)
     train_acc, test_acc = run_experiment(model, epochs=80, lr=0.05)
     print(f"Train acc: {train_acc:.3f}  |  Test acc: {test_acc:.3f}")
