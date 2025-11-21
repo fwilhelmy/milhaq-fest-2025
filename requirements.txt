@@ -11,3 +11,7 @@ pandas
 numpy
 matplotlib
 tensorboard
+
+# Utilities
+torch-summary
+discord-webhook
