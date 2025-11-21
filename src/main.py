@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+import os
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -8,6 +8,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
+from pytorch_lightning.callbacks import DeviceStatsMonitor, ModelCheckpoint
 
 from data import SwaptionDataset, load_data, prepare_data, split_data
 from model import GateQLSTM, LSTM, PhotonicQLSTM
@@ -107,12 +108,28 @@ def run_training(args):
             f"model_index must be between 0 and {len(model_names) - 1}, got {args.model_index}"
         )
 
+    log_dir = "logs"
+    model_dir = os.path.join(log_dir, model_names[args.model_index])
+    os.makedirs(model_dir, exist_ok=True)
+    ckpt_dir = os.path.join(model_dir, "checkpoints")
+    os.makedirs(ckpt_dir, exist_ok=True)
+    checkpoint_cb = ModelCheckpoint(
+        dirpath=ckpt_dir,
+        filename="epoch={epoch:02d}-loss={val/loss:.4f}",
+        auto_insert_metric_name=False,
+        save_top_k=3,
+        save_on_train_epoch_end=False,
+        monitor="val/loss",
+        mode="min"
+    )
+
     logger = TensorBoardLogger(save_dir="logs", name=f"swaption_{model_names[args.model_index]}")
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
         accelerator="auto",
         devices="auto",
         logger=logger,
+        callbacks=[checkpoint_cb],
         log_every_n_steps=10,
     )
 
