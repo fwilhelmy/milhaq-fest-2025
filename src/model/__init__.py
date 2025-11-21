@@ -1,5 +1,6 @@
 from .BaseModel import BaseModel
 from .LSTM import LSTM
-# from .QLSTM import QLSTM
+from .GateQLSTM import GateQLSTM, QLSTM
+from .PhotonicQLSTM import PhotonicQLSTM
 
-__all__ = ["BaseModel", "LSTM"] #, "QLSTM"]
+__all__ = ["BaseModel", "LSTM", "QLSTM"]
