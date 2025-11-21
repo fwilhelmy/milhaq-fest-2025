@@ -70,15 +70,18 @@ def run_training(args):
         n_components=args.n_components,
     )
 
-    models = [
-        PhotonicQLSTM(
+    if args.model_index==0:
+        print("Training Photonic QLSTM Model")
+        model = PhotonicQLSTM(
             input_size=feature_count,
             hidden_size=args.hidden_size,
             shots=args.photonic_shots,
             use_photonic_head=args.use_photonic_head,
             lr=args.lr,
-        ),
-        GateQLSTM(
+        )
+    elif args.model_index==1:
+        print("Training Gate-based QLSTM Model")
+        model =GateQLSTM(
             input_size=feature_count,
             hidden_size=args.hidden_size,
             vqc_depth=args.vqc_depth,
@@ -86,24 +89,23 @@ def run_training(args):
             device_name=args.device_name,
             shots=args.qlstm_shots,
             lr=args.lr,
-        ),
-        LSTM(
+        )
+    else:
+        print("Training Classical LSTM Model")
+        model = LSTM(
             input_size=feature_count,
             hidden_size=args.hidden_size,
             num_layers=args.num_layers,
             dropout=args.dropout,
             lr=args.lr,
-        ),
-    ]
+        )
 
     model_names = ["photonic-qlstm", "gate-qlstm", "lstm"]
 
-    if args.model_index < 0 or args.model_index >= len(models):
+    if args.model_index < 0 or args.model_index >= len(model_names):
         raise ValueError(
-            f"model_index must be between 0 and {len(models) - 1}, got {args.model_index}"
+            f"model_index must be between 0 and {len(model_names) - 1}, got {args.model_index}"
         )
-
-    model = models[args.model_index]
 
     logger = TensorBoardLogger(save_dir="logs", name=f"swaption_{model_names[args.model_index]}")
     trainer = pl.Trainer(
@@ -117,6 +119,8 @@ def run_training(args):
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
     trainer.test(model, dataloaders=test_loader)
 
+    return model, model_names[args.model_index]
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a Lightning LSTM on swaption volatilities.")
@@ -124,7 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--sequence-length", type=int, default=10, help="Sequence length for the LSTM input")
     parser.add_argument("--forecast-horizon", type=int, default=1, help="Days ahead to predict")
     parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
-    parser.add_argument("--hidden-size", type=int, default=16, help="Hidden size of the LSTM")
+    parser.add_argument("--hidden-size", type=int, default=8, help="Hidden size of the LSTM")
     parser.add_argument("--num-layers", type=int, default=2, help="Number of LSTM layers")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout between LSTM layers")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
