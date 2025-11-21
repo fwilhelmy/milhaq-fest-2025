@@ -5,6 +5,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.loggers import TensorBoardLogger
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
@@ -18,17 +19,32 @@ def create_dataloaders(
     forecast_horizon: int = 1,
     batch_size: int = 32,
     val_size: float = 0.1,
+    n_components: int | None = None,
 ):
     df = load_data(str(data_path))
     X, y, _ = prepare_data(df, forecast_horizon=forecast_horizon, sequence_length=sequence_length)
 
     feature_count = X.shape[-1]
 
+    if n_components is None:
+        n_components = feature_count
+
+    n_components = max(1, min(n_components, feature_count))
+
     feature_scaler = StandardScaler()
     target_scaler = StandardScaler()
 
     X_scaled = feature_scaler.fit_transform(X.reshape(-1, feature_count)).reshape(X.shape)
     y_scaled = target_scaler.fit_transform(y)
+
+    if n_components < feature_count:
+        pca = PCA(n_components=n_components)
+
+        flattened_X = X_scaled.reshape(-1, feature_count)
+        X_scaled = pca.fit_transform(flattened_X).reshape(X.shape[0], X.shape[1], n_components)
+
+        y_scaled = pca.transform(y_scaled)
+        feature_count = n_components
 
     X_train, X_test, y_train, y_test, _, _ = split_data(X_scaled, y_scaled, np.arange(len(X_scaled)))
 
@@ -51,6 +67,7 @@ def run_training(args):
         sequence_length=args.sequence_length,
         forecast_horizon=args.forecast_horizon,
         batch_size=args.batch_size,
+        n_components=args.n_components,
     )
 
     model = LSTM(
@@ -86,5 +103,11 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
     parser.add_argument("--max-epochs", type=int, default=10, help="Maximum number of training epochs")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument(
+        "--n-components",
+        type=int,
+        default=5,
+        help="Number of PCA components to retain (applied to both features and targets)",
+    )
 
     run_training(parser.parse_args())
