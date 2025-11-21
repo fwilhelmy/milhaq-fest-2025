@@ -54,7 +54,7 @@ class MerlinPhotonicGate(nn.Module):
         super().__init__()
         self.quantum_layer = qlayer
         self.shots = int(shots)
-        self._dtype = dtype if dtype is not None else torch.float64
+        self._dtype = dtype if dtype is not None else torch.float32
         if qlayer.output_size != target_size:
             self.post = nn.Linear(qlayer.output_size, target_size, bias=True, dtype=self._dtype)
         else:
@@ -107,7 +107,7 @@ class PhotonicQLSTMCell(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.use_photonic_head = use_photonic_head
-        self._dtype = dtype if dtype is not None else torch.float64
+        self._dtype = dtype if dtype is not None else torch.float32
 
         n_v = input_size + hidden_size
 
@@ -190,7 +190,7 @@ class PhotonicQLSTM(BaseModel):
         shots: int = 0,
         use_photonic_head: bool = False,
         lr: float = 1e-3,
-        dtype: Optional[torch.dtype] = torch.float64,
+        dtype: Optional[torch.dtype] = torch.float32,
     ):
         super().__init__(input_size=input_size, output_size=input_size, lr=lr)
         self.hidden_size = hidden_size

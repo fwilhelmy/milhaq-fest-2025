@@ -121,18 +121,17 @@ def run_training(args):
 
     return model, model_names[args.model_index]
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a Lightning LSTM on swaption volatilities.")
     parser.add_argument("--data", type=Path, default=Path("data/train.xlsx"), help="Path to the training Excel file")
     parser.add_argument("--sequence-length", type=int, default=10, help="Sequence length for the LSTM input")
     parser.add_argument("--forecast-horizon", type=int, default=1, help="Days ahead to predict")
     parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
-    parser.add_argument("--hidden-size", type=int, default=8, help="Hidden size of the LSTM")
+    parser.add_argument("--hidden-size", type=int, default=4, help="Hidden size of the LSTM")
     parser.add_argument("--num-layers", type=int, default=2, help="Number of LSTM layers")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout between LSTM layers")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
-    parser.add_argument("--model-index", type=int, default=2, help="Model to train: 0=photonic-qlstm, 1=gate-qlstm, 2=lstm")
+    parser.add_argument("--model-index", type=int, default=0, help="Model to train: 0=photonic-qlstm, 1=gate-qlstm, 2=lstm")
     parser.add_argument("--photonic-shots", type=int, default=0, help="Number of shots for photonic QLSTM (0=analytic)")
     parser.add_argument("--use-photonic-head", action="store_true", help="Use photonic head for photonic QLSTM output projection")
     parser.add_argument("--vqc-depth", type=int, default=2, help="Number of layers in gate-based QLSTM VQCs")
@@ -144,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n-components",
         type=int,
-        default=5,
+        default=2,
         help="Number of PCA components to retain (applied to both features and targets)",
     )
 
