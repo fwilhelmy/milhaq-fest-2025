@@ -8,9 +8,11 @@ merlinquantum
 
 # Data & Analytics
 pandas
+seaborn
 numpy
 matplotlib
 tensorboard
+openpyxl
 
 # Utilities
 torch-summary
