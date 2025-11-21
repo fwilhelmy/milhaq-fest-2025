@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from data import SwaptionDataset, load_data, prepare_data, split_data
-from model import LSTM, QLSTM
+from model import LSTM #, QLSTM
 
 
 def create_dataloaders(
