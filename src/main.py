@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from data import SwaptionDataset, load_data, prepare_data, split_data
-from model import LSTM
+from model import LSTM, QLSTM
 
 
 def create_dataloaders(
@@ -45,7 +45,7 @@ def create_dataloaders(
 
 def run_training(args):
     pl.seed_everything(args.seed)
-    
+
     train_loader, val_loader, test_loader, feature_count = create_dataloaders(
         data_path=args.data,
         sequence_length=args.sequence_length,
