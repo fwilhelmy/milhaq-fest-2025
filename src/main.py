@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader
 
 from data import SwaptionDataset, load_data, prepare_data, split_data
-from model import LSTM #, QLSTM
+from model import GateQLSTM, LSTM, PhotonicQLSTM
 
 
 def create_dataloaders(
@@ -70,15 +70,42 @@ def run_training(args):
         n_components=args.n_components,
     )
 
-    model = LSTM(
-        input_size=feature_count,
-        hidden_size=args.hidden_size,
-        num_layers=args.num_layers,
-        dropout=args.dropout,
-        lr=args.lr,
-    )
+    models = [
+        PhotonicQLSTM(
+            input_size=feature_count,
+            hidden_size=args.hidden_size,
+            shots=args.photonic_shots,
+            use_photonic_head=args.use_photonic_head,
+            lr=args.lr,
+        ),
+        GateQLSTM(
+            input_size=feature_count,
+            hidden_size=args.hidden_size,
+            vqc_depth=args.vqc_depth,
+            use_preencoders=args.use_preencoders,
+            device_name=args.device_name,
+            shots=args.qlstm_shots,
+            lr=args.lr,
+        ),
+        LSTM(
+            input_size=feature_count,
+            hidden_size=args.hidden_size,
+            num_layers=args.num_layers,
+            dropout=args.dropout,
+            lr=args.lr,
+        ),
+    ]
 
-    logger = TensorBoardLogger(save_dir="logs", name="swaption_lstm")
+    model_names = ["photonic-qlstm", "gate-qlstm", "lstm"]
+
+    if args.model_index < 0 or args.model_index >= len(models):
+        raise ValueError(
+            f"model_index must be between 0 and {len(models) - 1}, got {args.model_index}"
+        )
+
+    model = models[args.model_index]
+
+    logger = TensorBoardLogger(save_dir="logs", name=f"swaption_{model_names[args.model_index]}")
     trainer = pl.Trainer(
         max_epochs=args.max_epochs,
         accelerator="auto",
@@ -101,6 +128,13 @@ if __name__ == "__main__":
     parser.add_argument("--num-layers", type=int, default=2, help="Number of LSTM layers")
     parser.add_argument("--dropout", type=float, default=0.1, help="Dropout between LSTM layers")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
+    parser.add_argument("--model-index", type=int, default=2, help="Model to train: 0=photonic-qlstm, 1=gate-qlstm, 2=lstm")
+    parser.add_argument("--photonic-shots", type=int, default=0, help="Number of shots for photonic QLSTM (0=analytic)")
+    parser.add_argument("--use-photonic-head", action="store_true", help="Use photonic head for photonic QLSTM output projection")
+    parser.add_argument("--vqc-depth", type=int, default=2, help="Number of layers in gate-based QLSTM VQCs")
+    parser.add_argument("--qlstm-shots", type=int, default=0, help="Number of shots for gate-based QLSTM circuits (0=analytic)")
+    parser.add_argument("--use-preencoders", action="store_true", help="Enable separate encoders for x and h in gate-based QLSTM")
+    parser.add_argument("--device-name", type=str, default="default.qubit", help="PennyLane device name for gate-based QLSTM")
     parser.add_argument("--max-epochs", type=int, default=10, help="Maximum number of training epochs")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument(
