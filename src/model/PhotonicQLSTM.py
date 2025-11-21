@@ -52,16 +52,41 @@ class MerlinPhotonicGate(nn.Module):
         dtype: Optional[torch.dtype] = None,
     ):
         super().__init__()
-        self.quantum_layer = qlayer
+        # Register the QuantumLayer as a proper submodule so its parameters show up
+        # in the parent module's parameter list (``.parameters()``/``.named_parameters()``).
+        self.quantum_layer: ML.QuantumLayer = qlayer
+        # Mirror the QuantumLayer parameters to make the trainable tensors explicit to PyTorch
+        # even when callers inspect this module directly.
+        self.quantum_parameters = nn.ParameterList(
+            [p for p in self.quantum_layer.parameters() if p.requires_grad]
+        )
         self.shots = int(shots)
-        self._dtype = dtype if dtype is not None else torch.float32
+        # Respect an explicit dtype, otherwise keep the QuantumLayer's dtype so gradients
+        # remain on the same precision path.
+        self._dtype = dtype if dtype is not None else getattr(self.quantum_layer, "dtype", torch.float32)
         if qlayer.output_size != target_size:
             self.post = nn.Linear(qlayer.output_size, target_size, bias=True, dtype=self._dtype)
         else:
             self.post = nn.Identity()
 
+    def _ensure_quantum_layer_placement(self, x: torch.Tensor) -> torch.Tensor:
+        """Match the QuantumLayer dtype/device to the incoming tensor without breaking autograd."""
+
+        target_device = x.device
+        # Use dtype for computation but avoid unnecessary casts when already aligned.
+        target_dtype = self._dtype
+
+        if getattr(self.quantum_layer, "device", None) != target_device or getattr(
+            self.quantum_layer, "dtype", None
+        ) != target_dtype:
+            # ``to`` keeps the parameters attached to autograd and preserves gradients.
+            self.quantum_layer.to(device=target_device, dtype=target_dtype)
+
+        return x.to(device=target_device, dtype=target_dtype)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         shots = self.shots if self.shots > 0 else None
+        x = self._ensure_quantum_layer_placement(x)
         out = self.quantum_layer(x, shots=shots)
         if isinstance(self.post, nn.Linear):
             out = self.post(out.to(self._dtype))
