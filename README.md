@@ -54,5 +54,3 @@ Training logs and checkpoints are saved in `logs/<model-name>/` with TensorBoard
 
 - Jean Senellart's Merlin framework implementation for a QLSTM ([repository](https://github.com/jsenellart/reproduced_papers/tree/c62fc11168a890e923b8314910381559afc85314/QLSTM)).
 - Samuel Yen-Chi Chen, Shinjae Yoo, and Yao-Lung L. Fang, *Quantum Long Short-Term Memory* (arXiv:2009.01783).
-- Team: Samuel Richard, Guy-Philippe Nadon, Pacôme Gasnier, Felix Wilhelmy, and Andrews A. Okine.
-
