@@ -1,5 +1,6 @@
 # Mil'HaQ Fest 2025 - Track 2 Swaption Forecasting
 **Team: Samuel Richard · Guy-Philippe Nadon · Pacôme Gasnier · Felix Wilhelmy · Andrews A. Okine**
+**Award: Best Effort Prize – Quandela/Perceval Track**
 
 This repository contains the PercevalETS submission for Track 2 of the Mil'HaQ Fest 2025 hackathon. The challenge focuses on forecasting swaption volatility surfaces; our solution implements Quantum Long Short-Term Memory (QLSTM) models to predict future swaption values and benchmark them against a classical LSTM baseline.
 
